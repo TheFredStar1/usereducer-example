@@ -1,86 +1,54 @@
-import { useState } from 'react';
+import { useState, useReducer, useEffect } from 'react';
+import { emailReducer, passwordReducer } from '../reducers';
 
 const Form = () => {
-  const [email, setEmail] = useState('');
-  const [isEmailValid, setIsEmailValid] = useState(null);
-  const [emailErrMsg, setEmailErrMsg] = useState('');
+  const [emailState, emailDispatch] = useReducer(emailReducer, {
+    value: '',
+    isValid: null,
+    emailErrMsg: ''
+  });
 
-  const [password, setPassword] = useState('');
-  const [isPasswordValid, setIsPasswordValid] = useState(null);
-  const [passwordErrMsg, setPasswordErrMsg] = useState('');
+  const [passwordState, passwordDispatch] = useReducer(passwordReducer, {
+    value: '',
+    isValid: null,
+    passwordErrMSg: ''
+  })
 
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const onEmailChange = (e) => {
-    const isValid = !e.target.value.includes('@') || e.target.value.trim().length < 4 ? false : true;
-    let errMsg = '';
+  useEffect(() => {
+    setIsFormValid(emailState.isValid && passwordState.isValid ? true : false);
+  }, [emailState.isValid, passwordState.isValid]);
 
-    if (!isValid) {
-
-      if (!e.target.value.includes('@')) {
-        errMsg = 'Please enter a valid email address';
-      }
-
-      if (e.target.value.trim().length < 4) {
-        errMsg = 'Please enter an email longer than 4 or more characters';
-      }
-    }
-
-    setEmail(e.target.value);
-    setIsEmailValid(isValid);
-    setEmailErrMsg(errMsg);
-
-    if (isValid && isPasswordValid) {
-      setIsFormValid(true);
-    } else {
-      setIsFormValid(false);
-    }
-  };
-
-  const onPasswordChange = (e) => {
-    const isValid = e.target.value.trim().length < 4 ? false : true;
-    let errMsg = '';
-
-    if (!isValid) {
-      errMsg = 'Please enter a password longer than 4 or more characters';
-    }
-
-    setPassword(e.target.value);
-    setIsPasswordValid(isValid);
-    setPasswordErrMsg(errMsg);
-
-    if (isValid && isEmailValid) {
-      setIsFormValid(true);
-    } else {
-      setIsFormValid(false);
-    }
-  };
+  const onEmailChange = (e) => emailDispatch({type: 'EMAIL_CHANGE', payload: e.target.value});
+  
+  const onPasswordChange = (e) => passwordDispatch({type: 'PASSWORD_CHANGE', payload: e.target.value});
 
   return (
     <>
     <h1 className="my-4">Login Form</h1>
     <form>
 
-      <div className={`form-group ${isEmailValid === false ? 'invalid' : ''}`}>
+      <div className={`form-group ${emailState.isValid === false ? 'invalid' : ''}`}>
         <label htmlFor="email">Email:</label>
         <input 
           onChange={onEmailChange}
-          value={email}
+          value={emailState.value}
           className="form-control"
           id="email" 
           type="text" />
-        {emailErrMsg && <span>{emailErrMsg}</span>}
+        {emailState.emailErrMsg && <span>{emailState.emailErrMsg}</span>}
       </div>
 
-      <div className={`form-group ${isPasswordValid === false ? 'invalud' : ''}`}>
+      <div className={`form-group ${passwordState.isValid === false ? 'invalud' : ''}`}>
         <label htmlFor="password">Password:</label>
         <input 
           onChange={onPasswordChange}
-          value={password}
+          value={passwordState.value}
           className="form-control"
           id="password" 
           type="password" />
-        {passwordErrMsg && <span>{passwordErrMsg}</span>}
+        {passwordState.passwordErrMSg && <span>{passwordState.passwordErrMSg}</span>}
       </div>
 
       <div className="form-group mt-3">
